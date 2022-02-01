@@ -30,7 +30,7 @@ Account::Account() {
         this->seed = obj["seed"].asString();
         this->address = obj["address"].asString();
         this->version = obj["version"].asInt();
-        this->mining = (obj["mining"].asBool());
+        this->mining = obj["mining"].asBool();
     } else {
         std::printf("[ \033[31;1m!\033[0m ] Not found wallet file ...\n");
     }

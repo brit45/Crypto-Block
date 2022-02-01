@@ -9,7 +9,6 @@ struct Block_info {
     std::string From;
     std::string To;
     double Amount;
-    int timestamp;
 };
 
 class Block {
@@ -27,6 +26,7 @@ class Block {
         std::string get_Signed() const;
         std::string get_Hash() const;
         int get_head() const;
+        Block_info get_Data() const;
 
     private:
 
@@ -35,7 +35,7 @@ class Block {
         int timestamp;
         int Nonce;
         std::string Sign;
-        int Diff = 2;
+        int Diff = 4;
         Block_info data = {};
         std::string parent;
         std::string hash;
