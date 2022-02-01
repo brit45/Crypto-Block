@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.s": "amiga-assembly-debug.disassembly",
+        "*.html": "html",
+        "limits": "cpp"
+    }
+}
