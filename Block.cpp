@@ -2,7 +2,7 @@
 #include "Block.hpp"
 
 Block::Block(int head,std::string parent,Block_info transaction) {
-    this->length = sizeof(transaction);
+    this->length = sizeof(transaction.Amount) + sizeof(transaction.From) + sizeof(transaction.To);
     this->head = head;
     this->data = transaction;
     this->timestamp = time(NULL);
@@ -17,7 +17,7 @@ Block::~Block() {
 bool Block::Mining(std::string public_key) {
 
     int nonce = rand() % 0x3B9ACA00;
-    std::string input = this->data.From + this->data.To + std::to_string(this->data.Amount) + std::to_string(this->data.timestamp) + this->parent;
+    std::string input = this->data.From + this->data.To + std::to_string(this->data.Amount) + this->parent;
 
     std::string s = sha256(public_key + input + std::to_string(nonce));
 
@@ -77,4 +77,8 @@ std::string Block::get_Hash() const {
 
 int Block::get_head() const {
     return this->head;
+}
+
+Block_info Block::get_Data() const {
+    return this->data;
 }
