@@ -7,7 +7,9 @@ class Func {
         enum type_msg {
             info,
             alert,
-            error
+            error,
+            add,
+            remove
         };
         Func();
         ~Func();
