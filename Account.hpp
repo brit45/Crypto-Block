@@ -1,9 +1,8 @@
 #include <iostream>
+#include "Block.hpp"
 
 #ifndef __ACCOUNT_H__
 #define __ACCOUNT_H__
-
-
 
 class Account {
 
@@ -14,11 +13,12 @@ class Account {
         std::string get_Seed() const;
         std::string get_Account() const;
         std::string get_Address() const;
+        double Balance(Block* Blockchain);
+        double get_Balance() const;
 
         void Remake_seed(std::string seed);
 
         bool mining = false;
-
 
     private:
 
@@ -67,6 +67,7 @@ class Account {
         std::string seed;
         std::string account;
         std::string address;
+        double balance = 0;
         int version;
 };
 #endif // __ACCOUNT_H__

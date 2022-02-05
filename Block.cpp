@@ -1,17 +1,21 @@
 #include <iostream>
 #include "Block.hpp"
+#include <ctime>
+
+Func func;
 
 Block::Block(int head,std::string parent,Block_info transaction) {
-    this->length = sizeof(transaction.Amount) + sizeof(transaction.From) + sizeof(transaction.To);
+    this->length = sizeof(transaction.Amount) +transaction.From.size() + transaction.To.size();
     this->head = head;
     this->data = transaction;
     this->timestamp = time(NULL);
     this->parent = parent;
     this->hash = sha256(std::to_string(head) + parent);
+    func.Console_Log("Add Transaction.",func.type_msg::info);
 }
 
 Block::~Block() {
-    // TODO exit
+    func.Console_Log("Exit Block.",func.type_msg::info);
 }
 
 bool Block::Mining(std::string public_key) {
@@ -30,12 +34,14 @@ bool Block::Mining(std::string public_key) {
         pos = i;
     }
 
-    std::printf("\r[ MiNING ] diff=%i timestamp=%i Nonce=%i Search=%s Hash=%s",this->Diff,this->get_Timestamp(),nonce,difficult.c_str(),s.substr(0,8).c_str());
+    std::printf("\r[ MiNING ] Head=%i diff=%i timestamp=%i Nonce=%i Search=%s Hash=%s\t",this->head,this->Diff,this->get_Timestamp(),nonce,difficult.c_str(),s.substr(0,8).c_str());
     if(s.substr(0,pos) == difficult) {
         this->Nonce = nonce;
         this->Sign = s;
 
-        std::printf("New block detected\n");
+        std::cout << std::endl;
+        func.Console_Log("Transaction Certified.",func.type_msg::info);
+        
         return true;
 
     }
@@ -81,4 +87,30 @@ int Block::get_head() const {
 
 Block_info Block::get_Data() const {
     return this->data;
+}
+
+int Block::get_Diff() const {
+    return this->Diff;
+}
+
+void Block::set_Diff(int dif) {
+    this->Diff = dif;
+}
+
+Json::Value Block::get_Transaction() const {
+    Json::Value js;
+
+    js["Head"] = this->get_head();
+    js["Length"] = this->get_Lenght();
+    js["Data"]["To"] = this->get_Data().To;
+    js["Data"]["From"] = this->get_Data().From;
+    js["Data"]["Amount"] = this->get_Data().Amount;
+    js["Hash"] = this->get_Hash();
+    js["Timestamp"] = this->get_Timestamp();
+    js["Nonce"] = this->get_Nonce();
+    js["Sign"] = this->get_Signed();
+    js["Parent"] = this->get_Parent();
+    js["Diff"] = this->get_Diff();
+    
+    return js;
 }
