@@ -10,8 +10,7 @@ Block::Block(int head,std::string parent,Block_info transaction) {
     this->data = transaction;
     this->timestamp = time(NULL);
     this->parent = parent;
-    this->hash = sha256(std::to_string(head) + parent);
-    func.Console_Log("Add Transaction.",func.type_msg::info);
+    this->hash = sha256(std::to_string(head) + parent + std::to_string(this->timestamp));
 }
 
 Block::~Block() {
@@ -30,11 +29,11 @@ bool Block::Mining(std::string public_key) {
     int pos;
 
     for(int i = 1; i <= this->Diff; i++) {
-        difficult += "0";
+        difficult += "1";
         pos = i;
     }
 
-    std::printf("\r[ MiNING ] Head=%i diff=%i timestamp=%i Nonce=%i Search=%s Hash=%s\t",this->head,this->Diff,this->get_Timestamp(),nonce,difficult.c_str(),s.substr(0,8).c_str());
+    // std::printf("\r[ MiNING ]\tHead=%i\tdiff=%i\ttimestamp=%i\tNonce=%i\tHash=%s\r",this->head,this->Diff,this->get_Timestamp(),nonce,s.substr(0,8).c_str());
     if(s.substr(0,pos) == difficult) {
         this->Nonce = nonce;
         this->Sign = s;

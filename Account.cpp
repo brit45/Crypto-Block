@@ -6,6 +6,7 @@
 #include <jsoncpp/json/json.h>
 
 
+
 Func console;
 
 const int VERSION = 1;
@@ -145,9 +146,11 @@ void Account::Remake_seed(std::string seed)  {
 double Account::Balance(Block* Blockchain) {
     if(Blockchain->get_Data().From == this->get_Address()) {
         this->balance -= Blockchain->get_Data().Amount;
+        console.Console_Log("Balance : "+to_string(this->get_Balance()),console.type_msg::remove);
     }
     if(Blockchain->get_Data().To == this->get_Address()) {
         this->balance += Blockchain->get_Data().Amount;
+        console.Console_Log("Balance : "+to_string(this->get_Balance()),console.type_msg::add);
     }
     return this->balance;
 }
