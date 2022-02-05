@@ -1,26 +1,30 @@
 #include <random>
 #include "Account.hpp"
 #include "sha256.hpp"
-#include <jsoncpp/json/json.h>
 #include <fstream>
+#include <ctime>
+#include <jsoncpp/json/json.h>
+
+
+Func console;
 
 const int VERSION = 1;
 
 std::string link;
 
 Account::Account() {
-    
+
     srand(time(NULL));
 
     link = "/home/"+(std::string)std::getenv("USER")+"/.crypto/wallet/ids";    
 
-    std::printf("[ \033[34;1mi\033[0m ] Load wallet file ...\n\t- %s\n", link.c_str());
+    console.Console_Log("Load wallet file ...",console.type_msg::info);
     
     std::ifstream ifs(link);
 
     if(ifs.is_open()) {
         
-        std::printf("[ \033[34;1mi\033[0m ] Read wallet config ...\n");
+        console.Console_Log("Read wallet config ...",console.type_msg::info);
 
         Json::Reader reader;
         Json::Value obj;
@@ -32,7 +36,7 @@ Account::Account() {
         this->version = obj["version"].asInt();
         this->mining = obj["mining"].asBool();
     } else {
-        std::printf("[ \033[31;1m!\033[0m ] Not found wallet file ...\n");
+        console.Console_Log("Not found wallet file ...",console.type_msg::alert);
     }
 
 }
@@ -52,7 +56,7 @@ Account::~Account() {
     fs << User;
     fs.close();
 
-    std::printf("\n\n[ \033[34;1mi\033[0m ] Exit Account.\n");
+    console.Console_Log("Exit Account.\n",console.type_msg::info);
 }
 
 void Account::Create_Seed() {
@@ -71,7 +75,7 @@ void Account::Create_Seed() {
     this->seed = seed;
     this->account = sha256(seed);
     this->address = "0X" + sha256(this->account.substr(0,14)).substr(0,43);
-
+    
     Json::Value User;
 
     User["seed"] = this->seed;
@@ -82,20 +86,16 @@ void Account::Create_Seed() {
 
     std::ofstream fs;
 
-    std::printf("[ \033[34;1mi\033[0m ] Create wallet ...\n");
-    std::printf("[ \033[32;1m+\033[0m ] - Create directory :\n");
-    std::printf("[ \033[32;1m+\033[0m ]\t - .crypto\n");
-    
+    console.Console_Log("Create Wallet ...",console.type_msg::info);
+
     std::string directory = "mkdir /home/"+(std::string)std::getenv("USER")+"/.crypto -p";
 
     std::system(directory.c_str());
-
-    std::printf("[ \033[32;1m+\033[0m ]\t\t - wallet\n");
     
     directory = "mkdir /home/"+(std::string)std::getenv("USER")+"/.crypto/wallet -p";
     std::system(directory.c_str());
 
-    std::printf("[ \033[32;1m+\033[0m ] - File '%s'\n",link.c_str());
+    std::printf("[ \033[32;1m+\033[0m ] - Save Wallet '%s'\n",link.c_str());
     
     fs.open(link);
     fs << User;
@@ -119,6 +119,7 @@ void Account::Remake_seed(std::string seed)  {
     this->account = sha256(seed);
     this->address = "0X" + sha256(this->account.substr(0,14)).substr(0,43);
 
+    #if __linux
     Json::Value User;
 
     User["seed"] = this->seed;
@@ -129,11 +130,28 @@ void Account::Remake_seed(std::string seed)  {
 
     std::ofstream fs;
 
-    std::printf("[ \033[34;1mi\033[0m ] Remake wallet ...\n");
+    console.Console_Log("Remake wallet ...\n",console.type_msg::info);
     
     fs.open(link);
     fs << User;
     fs.close();
+    
+    #endif
 
     return;
+}
+
+
+double Account::Balance(Block* Blockchain) {
+    if(Blockchain->get_Data().From == this->get_Address()) {
+        this->balance -= Blockchain->get_Data().Amount;
+    }
+    if(Blockchain->get_Data().To == this->get_Address()) {
+        this->balance += Blockchain->get_Data().Amount;
+    }
+    return this->balance;
+}
+
+double Account::get_Balance() const {
+    return this->balance;
 }

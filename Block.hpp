@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include "sha256.hpp"
+#include "Function.hpp"
+#include <jsoncpp/json/json.h>
 
 struct Block_info {
 
@@ -27,6 +29,9 @@ class Block {
         std::string get_Hash() const;
         int get_head() const;
         Block_info get_Data() const;
+        int get_Diff() const;
+        void set_Diff(int dif);
+        Json::Value get_Transaction() const;
 
     private:
 
@@ -35,7 +40,7 @@ class Block {
         int timestamp;
         int Nonce;
         std::string Sign;
-        int Diff = 4;
+        int Diff = 1;
         Block_info data = {};
         std::string parent;
         std::string hash;
