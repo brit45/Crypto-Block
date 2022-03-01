@@ -1,6 +1,4 @@
-.vscode
-
-crypto
-merkle
-
-dev
+.vscode/*
+build/*
+*/cryptos
+dev/*
