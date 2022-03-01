@@ -2,11 +2,30 @@
 
 :warning: Code not compatible with system windows
 
+
+## Require
+
+- g++
+- libjsoncpp
+- libcrypto++-dev
+- libcrypto++-utils
+- libcryptos++-8
+
 ## Compile project
 
 ```sh
-$ ./compile_test.sh
-$ ./crypto
+$ mkdir build -p .
+$ cd build
+$ CXX=/usr/bin/g++
+$ cmake ..
+$ make
+
+```
+
+## Run
+
+```sh
+$ ./cryptos
 ```
 
 ## Configure programme
