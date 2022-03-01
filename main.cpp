@@ -8,6 +8,8 @@
 #include <cmath>
 #include <iomanip>
 #include "Base64.hpp"
+#include <thread>
+#include <jsoncpp/json/json.h>
 
 using namespace std;
 
@@ -16,15 +18,17 @@ Func function;
 vector<Block*> Blockchain;
 Account account;
 
-#include <thread>
-#include <jsoncpp/json/json.h>
+int list_block_file = 0;
+int lenght_block = 0;
+bool run = true;
+
 
 void Mining(Block* b) {
     int start = time(NULL);
     int end;
     bool s;
-    
-    while(!(s = b->Mining(account.get_Address()) && b->get_Signed() != "")){}
+
+    while(!(s = b->Mining(account.get_Address()) && b->get_Signed() != "")) {}
 
     end = time(NULL);
 
@@ -39,7 +43,7 @@ void Mining(Block* b) {
         if(de == b->get_Signed()) {
 
             Block_info info_block;
-            info_block.Amount = b->get_Diff()+(end-start);
+            info_block.Amount = (b->get_Diff()+(end-start))+(rand()%b->get_Diff()*50);
             info_block.From = "Reward";
             info_block.To = account.get_Address();
             int size = Blockchain.size();
@@ -65,86 +69,156 @@ void Mining(Block* b) {
 
 }
 
-bool run = true;
 
 void quit() {
 
-    string r;
-    cout << "Quit (n) : ";
+    string r = "n";
+    std::cout << endl << endl;
+    std::cout << "Quit (y/N) : ";
     getline(cin,r);
     cin.ignore(10,'\n');
 
-    if(r == "n") {
-        function.Console_Log("Wait for quit programme ...",Func::type_msg::info);
+    if(r == "y" || r == "Y") {
+        std::cout << endl << endl;
+        function.Console_Log("Wait for quit programme ...",Func::type_msg::alert);
         run = false;
         return;
     }
+    else {}
 }
 
 int main() {
 
+    fstream fsx, fs_index;
 
-    Block_info info_block;
-    info_block.Amount = 0x174876E800;
-    info_block.From = "";
-    info_block.To = "0X39216175d066d5ca660308ca0ee5f25cc8ee91fd7f0";
+    fs_index.open("dev/index");
 
-    function.Console_Log("Creation de la Genesis",function.type_msg::info);
+    if(fs_index.is_open()) {
+        
+        function.Console_Log("Open List of Transaction ...",function.type_msg::info);
+        Json::Reader read_data;
+        Json::Value obj;
 
-    Block *genesis = new Block(0,"f9261c5b0f73ef5b3d0151ecdc28ac67c17e9cfbe45e63bd1f1e244a21f18779",info_block);
-    Blockchain.push_back(genesis);
+        string index;
 
-    int balance = account.get_Balance();
+        while(!getline(fs_index,index).eof()) {
+            list_block_file++;
+            fsx.open(index);
+            read_data.parse(fsx,obj);
+
+            function.Console_Log("Read Transaction : "+to_string(obj["Tx"].size()),Func::type_msg::info);
+
+            for(int i=0;i < obj["Tx"].size();i++) {
+
+                Block* blk = new Block();
+                blk->set_Transaction(obj["Tx"][i]);
+                
+                function.Console_Log("Load Transaction "+index.substr(4,9)+" "+obj["Tx"][i]["Hash"].asString().substr(0,8),function.type_msg::add);
+                Blockchain.push_back(blk);
+            }
+
+            fsx.close();
+        }
+
+        lenght_block = Blockchain.size();
+
+        std::cout << endl << endl;
+        function.Console_Log("Lenght Transaction Loaded : "+to_string(lenght_block),Func::info);
+
+        for(int i=0; i < Blockchain.size();i++) {
+            account.Balance(Blockchain[i]);
+        }
+    }
+    else {
+
+        Block_info info_block;
+        // info_block.Amount = 0x174876E800;
+        info_block.Amount = 0;
+        info_block.From = "0x0000000000000000000000000000000000000000000";
+        info_block.To = "Reward";
+
+        function.Console_Log("Creation de la Genesis",function.type_msg::info);
+
+        Block *genesis = new Block(0,"f9261c5b0f73ef5b3d0151ecdc28ac67c17e9cfbe45e63bd1f1e244a21f18779",info_block);
+        Blockchain.push_back(genesis);
+    }
+
+    fsx.close();
+    
+    std::cout << endl << endl;
     function.Console_Log("- Address : "+account.get_Address(),function.type_msg::info);
 
-    //? TEST --------------------------------------------------------------------
+    //? ========================================================================================= TEST
 
-    info_block.Amount = 0x174876E800;
+    Block_info info_block;
+    info_block.Amount = 20;
     info_block.From = "0X39216175d066d5ca660308ca0ee5f25cc8ee91fd7f0";
-    info_block.To = "0X39216175d06785ca660308ca0ee5f25cc8ee91fd7f0";
-    Blockchain.push_back(new Block(Blockchain.size(),Blockchain[Blockchain.size()-1]->get_Hash(),info_block));
+    info_block.To = "0x0000000000000000000000000000000000000000000";
+    Blockchain.push_back(new Block(Blockchain[Blockchain.size()-1]->get_head()+1,Blockchain[Blockchain.size()-1]->get_Parent(),info_block));
     
-    //? END TEST --------------------------------------------------------------------
+    //? ========================================================================================= END TEST
 
-    Json::Value t;
-
-    
 
     int block_size = Blockchain.size();
+
+    thread *_quit = new thread(quit);
 
     while(run) {
 
         if(block_size != Blockchain.size()) {
+            
             block_size = Blockchain.size();
-            balance = account.get_Balance();
+            
         }
 
         if(account.mining == true) {
 
             int limit = block_size + 1;
 
-            for(int i = 0; i < Blockchain.size();i++) {
-                if(Blockchain[i]->get_Signed() == "") {
+            for(int i = 0; i < Blockchain.size() && run == true;i++) {
+                if(Blockchain[i]->get_Signed() == "" && run == true) {
                     if(Blockchain[i]->Signed(account.get_Address(),account.get_Account())) {
                         if(Blockchain.size() < limit) {
-                            thread *_mining = new thread(Mining,Blockchain[i]);
-                            _mining->join();
-                            t["Tx"][i] = Blockchain[i]->get_Transaction();
+                            Mining(Blockchain[i]);
+                            function.Console_Log("Head : "+to_string(Blockchain[i]->get_head()),Func::type_msg::info);
                             function.Console_Log("Diff : "+to_string(Blockchain[i]->get_Diff()),Func::type_msg::info);
-                            thread *_quit = new thread(quit);
+                            function.Console_Log("Reward : "+to_string(Blockchain[i]->get_Data().Amount),Func::type_msg::info);
                         }
                     }
                 }
             }
         }
+
+        
     }
 
-    ofstream fs;
-    fs.open("dev/test_tx",ios::binary);
-    string save = base64_encode_pem(t.toStyledString());
-    fs << t << endl;
-    fs.close();
+    for(int i = 0; i < Blockchain.size(); i++) {
+        account.Balance(Blockchain[i]);
+    }
 
+    account.get_Balance();
+
+    if(block_size != lenght_block) {
+        Json::Value t;
+
+        int l = 0;
+        for(int i = ((lenght_block) == 0)?0:lenght_block; i < block_size; i++) {
+            function.Console_Log("Read Transaction on head :"+to_string(Blockchain[i]->get_head()),Func::type_msg::info);
+            t["Tx"][l] = Blockchain[i]->get_Transaction();
+            l++;
+        }
+
+        ofstream fs;
+
+        fs.open("dev/index",ios_base::app);
+        string save = "dev/test" + to_string(list_block_file);
+        fs << save << endl;
+        fs.close();
+
+        fs.open(save);
+        fs << t << endl;
+        fs.close();
+    }
 
     return 0;
 }
