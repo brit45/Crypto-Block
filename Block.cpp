@@ -1,8 +1,11 @@
 #include <iostream>
+#include <cmath>
 #include "Block.hpp"
 #include <ctime>
 
 Func func;
+
+Block::Block() {}
 
 Block::Block(int head,std::string parent,Block_info transaction) {
     this->length = sizeof(transaction.Amount) +transaction.From.size() + transaction.To.size();
@@ -33,7 +36,7 @@ bool Block::Mining(std::string public_key) {
         pos = i;
     }
 
-    // std::printf("\r[ MiNING ]\tHead=%i\tdiff=%i\ttimestamp=%i\tNonce=%i\tHash=%s\r",this->head,this->Diff,this->get_Timestamp(),nonce,s.substr(0,8).c_str());
+    // std::printf("\r⛏️\tHead=%i\tdiff=%i\ttimestamp=%i\tNonce=%i\tHash=%s",this->head,this->Diff,this->get_Timestamp(),nonce,s.substr(0,8).c_str());
     if(s.substr(0,pos) == difficult) {
         this->Nonce = nonce;
         this->Sign = s;
@@ -112,4 +115,19 @@ Json::Value Block::get_Transaction() const {
     js["Diff"] = this->get_Diff();
     
     return js;
+}
+
+void Block::set_Transaction(Json::Value js) {
+
+    this->head = js["Head"].asInt();
+    this->length = js["Length"].asInt();
+    this->data.To = js["Data"]["To"].asString();
+    this->data.From = js["Data"]["From"].asString();
+    this->data.Amount = js["Data"]["Amount"].asDouble();
+    this->hash = js["Hash"].asString();
+    this->timestamp = js["Timestamp"].asInt();
+    this->Nonce = js["Nonce"].asInt();
+    this->Sign = js["Sign"].asString();
+    this->parent = js["Parent"].asString();
+    this->Diff = js["Diff"].asInt();
 }

@@ -16,7 +16,7 @@ struct Block_info {
 class Block {
 
     public:
-
+        Block();
         Block(int head,std::string parent,Block_info transaction);
         ~Block();
         bool Signed(std::string public_key,std::string private_key);
@@ -32,6 +32,7 @@ class Block {
         int get_Diff() const;
         void set_Diff(int dif);
         Json::Value get_Transaction() const;
+        void set_Transaction(Json::Value js);
 
     private:
 

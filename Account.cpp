@@ -27,9 +27,9 @@ Account::Account() {
         
         console.Console_Log("Read wallet config ...",console.type_msg::info);
 
-        Json::Reader reader;
+        Json::Reader reader__;
         Json::Value obj;
-        reader.parse(ifs,obj);
+        reader__.parse(ifs,obj);
 
         this->account = obj["account"].asString();
         this->seed = obj["seed"].asString();
@@ -119,8 +119,7 @@ void Account::Remake_seed(std::string seed)  {
     this->seed = seed;
     this->account = sha256(seed);
     this->address = "0X" + sha256(this->account.substr(0,14)).substr(0,43);
-
-    #if __linux
+    
     Json::Value User;
 
     User["seed"] = this->seed;
@@ -136,25 +135,27 @@ void Account::Remake_seed(std::string seed)  {
     fs.open(link);
     fs << User;
     fs.close();
-    
-    #endif
 
     return;
 }
 
 
-double Account::Balance(Block* Blockchain) {
+void Account::Balance(Block* Blockchain) {
     if(Blockchain->get_Data().From == this->get_Address()) {
-        this->balance -= Blockchain->get_Data().Amount;
-        console.Console_Log("Balance : "+to_string(this->get_Balance()),console.type_msg::remove);
+        this->last_balance = this->balance;
+        this->balance -= (int)Blockchain->get_Data().Amount;
     }
     if(Blockchain->get_Data().To == this->get_Address()) {
-        this->balance += Blockchain->get_Data().Amount;
-        console.Console_Log("Balance : "+to_string(this->get_Balance()),console.type_msg::add);
+        this->last_balance = this->balance;
+        this->balance = (int)(this->balance + (int)Blockchain->get_Data().Amount);
     }
-    return this->balance;
 }
 
-double Account::get_Balance() const {
-    return this->balance;
+void Account::get_Balance() const {
+    if(this->balance > this->last_balance) {
+        console.Console_Log("Balance : "+ std::to_string(this->balance),console.type_msg::add);
+    }
+    if(this->balance < this->last_balance) {
+        console.Console_Log("Balance : "+ std::to_string(this->balance),console.type_msg::remove);
+    }
 }
