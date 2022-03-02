@@ -1,4 +1,6 @@
+.vscode 
 .vscode/*
 build/*
-*/cryptos
+dev 
 dev/*
+.vscode/
