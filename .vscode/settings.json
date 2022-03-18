@@ -3,5 +3,6 @@
         "*.s": "amiga-assembly-debug.disassembly",
         "*.html": "html",
         "limits": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

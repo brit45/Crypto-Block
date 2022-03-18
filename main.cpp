@@ -10,6 +10,7 @@
 #include "Base64.hpp"
 #include <thread>
 #include <jsoncpp/json/json.h>
+#include "Network.hpp"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ void Mining(Block* b) {
             info_block.To = account.get_Address();
             int size = Blockchain.size();
             Blockchain.push_back(new Block(size,Blockchain[size-1]->get_Hash(),info_block));
-            account.Balance(b);
+            account.Balance(Blockchain);
         }
         
         if((end - start) >= 10) {
@@ -87,7 +88,18 @@ void quit() {
     else {}
 }
 
-int main() {
+
+
+
+int main(int argc, char* argv[]) {
+
+    // Server *server = new Server();
+
+    // server->Bind("127.0.0.1",8000);
+    // server->Listen();
+
+
+    // return 0;
 
     fstream fsx, fs_index;
 
@@ -125,21 +137,17 @@ int main() {
         std::cout << endl << endl;
         function.Console_Log("Lenght Transaction Loaded : "+to_string(lenght_block),Func::info);
 
-        for(int i=0; i < Blockchain.size();i++) {
-            account.Balance(Blockchain[i]);
-        }
     }
     else {
 
         Block_info info_block;
-        // info_block.Amount = 0x174876E800;
         info_block.Amount = 0;
         info_block.From = "0x0000000000000000000000000000000000000000000";
         info_block.To = "Reward";
 
         function.Console_Log("Creation de la Genesis",function.type_msg::info);
 
-        Block *genesis = new Block(0,"f9261c5b0f73ef5b3d0151ecdc28ac67c17e9cfbe45e63bd1f1e244a21f18779",info_block);
+        Block *genesis = new Block(0,"the sunday 5th on the moon paradise is fake.",info_block);
         Blockchain.push_back(genesis);
     }
 
@@ -162,6 +170,8 @@ int main() {
     int block_size = Blockchain.size();
 
     thread *_quit = new thread(quit);
+
+
 
     while(run) {
 
@@ -192,9 +202,7 @@ int main() {
         
     }
 
-    for(int i = 0; i < Blockchain.size(); i++) {
-        account.Balance(Blockchain[i]);
-    }
+    account.Balance(Blockchain);
 
     account.get_Balance();
 
@@ -210,8 +218,8 @@ int main() {
 
         ofstream fs;
 
-        fs.open("dev/index",ios_base::app);
-        string save = "dev/test" + to_string(list_block_file);
+        fs.open("./dev/index",ios_base::app);
+        string save = "./dev/test__" + to_string(list_block_file);
         fs << save << endl;
         fs.close();
 

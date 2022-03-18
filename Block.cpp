@@ -36,7 +36,7 @@ bool Block::Mining(std::string public_key) {
         pos = i;
     }
 
-    // std::printf("\r⛏️\tHead=%i\tdiff=%i\ttimestamp=%i\tNonce=%i\tHash=%s",this->head,this->Diff,this->get_Timestamp(),nonce,s.substr(0,8).c_str());
+    std::printf("\r⛏️\tHead=%i\tdiff=%i\ttimestamp=%i\tNonce=%i\tHash=%s",this->head,this->Diff,this->get_Timestamp(),nonce,s.substr(0,8).c_str());
     if(s.substr(0,pos) == difficult) {
         this->Nonce = nonce;
         this->Sign = s;

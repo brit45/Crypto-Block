@@ -13,7 +13,7 @@ class Account {
         std::string get_Seed() const;
         std::string get_Account() const;
         std::string get_Address() const;
-        void Balance(Block* Blockchain);
+        void Balance(std::vector<Block*> Blockchain);
         void get_Balance() const;
 
         void Remake_seed(std::string seed);

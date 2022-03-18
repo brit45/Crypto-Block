@@ -28,7 +28,18 @@ void Func::Console_Log(std::string msg,type_msg type) {
             banner += "[ \033[31;1m - \033[0m ] ";
             break;
         }
+        case 5: {
+            banner += "[ \033[36;1m ? \033[0m ] ";
+            break;
+        }
+
     }
     banner += msg;
-    std::cout << banner << std::endl;
+
+    if(type != type_msg::ask) {
+        std::cout << banner << std::endl;
+    }
+    else {
+        std::cout << banner << " :";
+    }
 }

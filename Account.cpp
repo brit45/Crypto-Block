@@ -38,6 +38,15 @@ Account::Account() {
         this->mining = obj["mining"].asBool();
     } else {
         console.Console_Log("Not found wallet file ...",console.type_msg::alert);
+        console.Console_Log("Want to create wallet ? ( y / n )",console.type_msg::ask);
+        std::string ask;
+        std::getline(cin, ask);
+        if(ask == "y") {
+            this->Create_Seed();
+        }
+        else {
+            exit(EXIT_FAILURE);
+        }
     }
 
 }
@@ -62,7 +71,7 @@ Account::~Account() {
 
 void Account::Create_Seed() {
 
-    link = "/home/"+(std::string)std::getenv("USER")+"/.crypto/wallet/ids";
+    link = (std::string)std::getenv("HOME");
 
     std::string seed;
     int val = 39;
@@ -89,16 +98,16 @@ void Account::Create_Seed() {
 
     console.Console_Log("Create Wallet ...",console.type_msg::info);
 
-    std::string directory = "mkdir /home/"+(std::string)std::getenv("USER")+"/.crypto -p";
+    std::string directory = "mkdir "+link+"/.crypto -p";
 
     std::system(directory.c_str());
     
-    directory = "mkdir /home/"+(std::string)std::getenv("USER")+"/.crypto/wallet -p";
+    directory = "mkdir "+link+"/.crypto/wallet -p";
     std::system(directory.c_str());
 
-    std::printf("[ \033[32;1m+\033[0m ] - Save Wallet '%s'\n",link.c_str());
+    console.Console_Log("Save Wallet "+link+"/.crypto/wallet/ids", Func::type_msg::add);
     
-    fs.open(link);
+    fs.open(link+"/.crypto/wallet/ids");
     fs << User;
     fs.close();
 }
@@ -128,11 +137,20 @@ void Account::Remake_seed(std::string seed)  {
     User["mining"] = this->mining;
     User["version"] = VERSION;
 
-    std::ofstream fs;
-
     console.Console_Log("Remake wallet ...\n",console.type_msg::info);
     
-    fs.open(link);
+    std::ofstream fs;
+
+    std::string directory = "mkdir "+link+"/.crypto -p";
+
+    std::system(directory.c_str());
+    
+    directory = "mkdir "+link+"/.crypto/wallet";
+    std::system(directory.c_str());
+
+    console.Console_Log("Save Wallet "+directory+"/ids", Func::type_msg::add);
+    
+    fs.open(directory+"/ids");
     fs << User;
     fs.close();
 
@@ -140,15 +158,21 @@ void Account::Remake_seed(std::string seed)  {
 }
 
 
-void Account::Balance(Block* Blockchain) {
-    if(Blockchain->get_Data().From == this->get_Address()) {
-        this->last_balance = this->balance;
-        this->balance -= (int)Blockchain->get_Data().Amount;
+void Account::Balance(std::vector<Block *> Blockchain) {
+
+    this->balance = 0;
+
+    for(int i = 0; i < Blockchain.size(); i++) {
+        if(Blockchain[i]->get_Data().From == this->get_Address()) {
+            this->last_balance = this->balance;
+            this->balance -= Blockchain[i]->get_Data().Amount;
+        }
+        if(Blockchain[i]->get_Data().To == this->get_Address()) {
+            this->last_balance = this->balance;
+            this->balance += Blockchain[i]->get_Data().Amount;
+        }
     }
-    if(Blockchain->get_Data().To == this->get_Address()) {
-        this->last_balance = this->balance;
-        this->balance = (int)(this->balance + (int)Blockchain->get_Data().Amount);
-    }
+
 }
 
 void Account::get_Balance() const {

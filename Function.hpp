@@ -9,7 +9,8 @@ class Func {
             alert,
             error,
             add,
-            remove
+            remove,
+            ask
         };
         Func();
         ~Func();
