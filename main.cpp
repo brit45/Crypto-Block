@@ -89,6 +89,21 @@ void quit() {
 }
 
 
+void CreateGenesis() {
+
+
+    Block_info info_block;
+    info_block.Amount = 0;
+    info_block.From = "";
+    info_block.To = "";
+
+    function.Console_Log("Creation de la Genesis",function.type_msg::info);
+
+    Block *genesis = new Block(0,sha256("the sunday 5th on the moon paradise is fake."),info_block);
+    Blockchain.push_back(genesis);
+}
+
+
 
 
 int main(int argc, char* argv[]) {
@@ -125,9 +140,11 @@ int main(int argc, char* argv[]) {
                 Block* blk = new Block();
                 blk->set_Transaction(obj["Tx"][i]);
                 
-                function.Console_Log("Load Transaction "+index.substr(4,9)+" "+obj["Tx"][i]["Hash"].asString().substr(0,8),function.type_msg::add);
+                function.Console_Log(" - Load Transaction "+index.substr(4,9)+" "+obj["Tx"][i]["Hash"].asString().substr(0,8),function.type_msg::add);
                 Blockchain.push_back(blk);
             }
+
+            cout << endl;
 
             fsx.close();
         }
@@ -140,15 +157,7 @@ int main(int argc, char* argv[]) {
     }
     else {
 
-        Block_info info_block;
-        info_block.Amount = 0;
-        info_block.From = "0x0000000000000000000000000000000000000000000";
-        info_block.To = "Reward";
-
-        function.Console_Log("Creation de la Genesis",function.type_msg::info);
-
-        Block *genesis = new Block(0,"the sunday 5th on the moon paradise is fake.",info_block);
-        Blockchain.push_back(genesis);
+        CreateGenesis();
     }
 
     fsx.close();
@@ -156,22 +165,9 @@ int main(int argc, char* argv[]) {
     std::cout << endl << endl;
     function.Console_Log("- Address : "+account.get_Address(),function.type_msg::info);
 
-    //? ========================================================================================= TEST
-
-    Block_info info_block;
-    info_block.Amount = 20;
-    info_block.From = "0X39216175d066d5ca660308ca0ee5f25cc8ee91fd7f0";
-    info_block.To = "0x0000000000000000000000000000000000000000000";
-    Blockchain.push_back(new Block(Blockchain[Blockchain.size()-1]->get_head()+1,Blockchain[Blockchain.size()-1]->get_Parent(),info_block));
-    
-    //? ========================================================================================= END TEST
-
-
     int block_size = Blockchain.size();
 
     thread *_quit = new thread(quit);
-
-
 
     while(run) {
 
@@ -219,7 +215,7 @@ int main(int argc, char* argv[]) {
         ofstream fs;
 
         fs.open("./dev/index",ios_base::app);
-        string save = "./dev/test__" + to_string(list_block_file);
+        string save = "./dev/test__.bkl" + to_string(list_block_file);
         fs << save << endl;
         fs.close();
 
